@@ -2,7 +2,7 @@
 
 
 
-A private, local AI chat application powered by the \*\*QVAC SDK\*\*.
+A private, local AI chat application powered by the QVAC SDK.
 
 
 
@@ -20,45 +20,55 @@ LocalAI Chat runs AI inference directly on your device using QVAC, without sendi
 
 \- 💬 Multi-turn conversation history
 
-\- ⚡ Simple browser-based interface
+\- ⚡ Browser-based interface
 
 \- 📱 Responsive UI
 
 \- 🚫 No OpenAI, Gemini, Claude, or other cloud AI API
 
-\- 🧠 Uses the Llama 3.2 1B instruction model through QVAC
+\- 🧠 Llama 3.2 1B instruction model through QVAC
 
 
 
-\## How It Works
+\## Requirements
 
 
 
-```text
+\- Node.js 22.20.0 or newer
 
-Browser
+\- npm 10.9.3 or newer
 
-&#x20;  │
+\- QVAC-supported system
 
-&#x20;  ▼
 
-Express Server
 
-&#x20;  │
+This project was developed and tested with Node.js 22.20.0 and npm 10.9.3.
 
-&#x20;  ▼
 
-QVAC SDK
 
-&#x20;  │
+\## QVAC SDK
 
-&#x20;  ▼
 
-Local Llama Model
 
-&#x20;  │
+Built with `@qvac/sdk v0.19.0`.
 
-&#x20;  ▼
 
-AI Response
+
+The QVAC SDK provides the local model loading and inference functionality used by this application.
+
+
+
+\## Installation
+
+
+
+Clone the repository:
+
+
+
+```bash
+
+git clone https://github.com/surajguptakr/local-ai-chat.git
+
+cd local-ai-chat
 

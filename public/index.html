@@ -3,314 +3,1138 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LocalAI Chat</title>
+
+  <title>LocalAI Chat — Private AI</title>
 
   <style>
     * {
       box-sizing: border-box;
     }
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      color: #1f2937;
+    :root {
+      --bg: #f5f7fb;
+      --surface: rgba(255, 255, 255, 0.88);
+      --surface-solid: #ffffff;
+      --border: #e6e8f0;
+      --text: #171827;
+      --muted: #73778a;
+      --primary: #6d5dfc;
+      --primary-dark: #5545e8;
+      --primary-soft: #eeeaff;
+      --success: #22c55e;
+      --shadow: 0 12px 40px rgba(35, 31, 75, 0.10);
     }
 
-    .app {
-      width: min(900px, 95%);
-      margin: 30px auto;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family:
+        Inter,
+        ui-sans-serif,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+      background:
+        radial-gradient(
+          circle at 15% 10%,
+          rgba(109, 93, 252, 0.10),
+          transparent 28%
+        ),
+        radial-gradient(
+          circle at 85% 90%,
+          rgba(79, 70, 229, 0.08),
+          transparent 30%
+        ),
+        var(--bg);
+
+      color: var(--text);
       overflow: hidden;
     }
 
-    header {
-      padding: 24px;
-      background: #111827;
+    button,
+    input {
+      font: inherit;
+    }
+
+    /* =====================================
+       APP
+    ====================================== */
+
+    .app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* =====================================
+       HEADER
+    ====================================== */
+
+    .header {
+      flex-shrink: 0;
+      height: 92px;
+
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+
+      border-bottom: 1px solid var(--border);
+
+      position: relative;
+      z-index: 20;
+    }
+
+    .header-inner {
+      width: min(1050px, 94%);
+      height: 100%;
+      margin: auto;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 14px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7c6cff,
+          #5b4ce9
+        );
+
       color: white;
+
+      font-size: 21px;
+      font-weight: 800;
+
+      box-shadow:
+        0 8px 20px rgba(109, 93, 252, 0.28);
     }
 
-    header h1 {
-      margin: 0 0 6px;
-      font-size: 26px;
-    }
-
-    header p {
+    .brand-text h1 {
       margin: 0;
-      color: #d1d5db;
+
+      font-size: 19px;
+      line-height: 1.2;
+      font-weight: 750;
+      letter-spacing: -0.3px;
     }
 
-    .badge {
-      display: inline-block;
-      margin-top: 14px;
-      padding: 7px 12px;
-      border-radius: 20px;
-      background: #166534;
-      font-size: 13px;
+    .brand-text p {
+      margin: 4px 0 0;
+
+      color: var(--muted);
+      font-size: 12px;
     }
+
+    /* =====================================
+       QVAC STATUS
+    ====================================== */
+
+    .qvac-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      padding: 9px 13px;
+
+      border: 1px solid #dcd8ff;
+      border-radius: 999px;
+
+      background: rgba(245, 243, 255, 0.9);
+
+      color: #5043bf;
+
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+
+      border-radius: 50%;
+
+      background: var(--success);
+
+      box-shadow:
+        0 0 0 4px rgba(34, 197, 94, 0.12);
+
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.25);
+      }
+
+      70% {
+        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+      }
+    }
+
+    /* =====================================
+       CHAT
+    ====================================== */
 
     .chat {
-      height: 500px;
+      flex: 1;
+      min-height: 0;
+
       overflow-y: auto;
-      padding: 22px;
-      background: #f9fafb;
+
+      padding: 35px 20px 170px;
+
+      scroll-behavior: smooth;
     }
+
+    .chat::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    .chat::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat::-webkit-scrollbar-thumb {
+      background: #d8d9e4;
+      border-radius: 20px;
+    }
+
+    .chat-inner {
+      width: min(850px, 100%);
+      margin: auto;
+    }
+
+    /* =====================================
+       WELCOME SCREEN
+    ====================================== */
+
+    .welcome {
+      min-height: 52vh;
+
+      display: flex;
+      flex-direction: column;
+
+      align-items: center;
+      justify-content: center;
+
+      text-align: center;
+
+      padding: 40px 20px;
+    }
+
+    .welcome-icon {
+      width: 70px;
+      height: 70px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 22px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7767ff,
+          #5748e8
+        );
+
+      color: white;
+
+      font-size: 31px;
+      font-weight: 800;
+
+      box-shadow:
+        0 15px 35px rgba(109, 93, 252, 0.25);
+
+      margin-bottom: 22px;
+    }
+
+    .welcome h2 {
+      margin: 0;
+
+      font-size: 27px;
+      letter-spacing: -0.7px;
+    }
+
+    .welcome p {
+      max-width: 500px;
+
+      margin: 10px auto 0;
+
+      color: var(--muted);
+
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .privacy-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+
+      margin-top: 20px;
+
+      padding: 8px 12px;
+
+      border-radius: 999px;
+
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid var(--border);
+
+      color: #65697a;
+
+      font-size: 11px;
+    }
+
+    /* =====================================
+       MESSAGES
+    ====================================== */
 
     .message {
+      display: flex;
+
+      margin-bottom: 22px;
+
+      animation: messageIn 0.22s ease-out;
+    }
+
+    @keyframes messageIn {
+      from {
+        opacity: 0;
+        transform: translateY(7px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .message.assistant {
+      justify-content: flex-start;
+    }
+
+    .message-content {
       max-width: 78%;
-      margin-bottom: 16px;
-      padding: 12px 15px;
-      border-radius: 14px;
-      line-height: 1.5;
-      white-space: pre-wrap;
+      display: flex;
+      flex-direction: column;
     }
 
-    .user {
-      margin-left: auto;
-      background: #2563eb;
-      color: white;
-      border-bottom-right-radius: 4px;
+    .message-label {
+      margin: 0 0 6px 4px;
+
+      color: var(--muted);
+
+      font-size: 10px;
+      font-weight: 700;
+
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
     }
 
-    .assistant {
-      margin-right: auto;
-      background: #e5e7eb;
-      color: #111827;
-      border-bottom-left-radius: 4px;
+    .user .message-label {
+      text-align: right;
+      margin-right: 4px;
     }
 
-    .system {
-      max-width: 100%;
-      text-align: center;
-      color: #6b7280;
+    .bubble {
+      padding: 14px 17px;
+
+      border-radius: 18px;
+
       font-size: 14px;
-      margin: 10px 0 18px;
+      line-height: 1.65;
+
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
-    .typing {
-      font-style: italic;
-      color: #6b7280;
+    .user .bubble {
+      color: white;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7464ff,
+          #594ae9
+        );
+
+      border-bottom-right-radius: 5px;
+
+      box-shadow:
+        0 8px 22px rgba(91, 76, 233, 0.18);
+    }
+
+    .assistant .bubble {
+      color: #252638;
+
+      background: rgba(255, 255, 255, 0.92);
+
+      border: 1px solid var(--border);
+
+      border-bottom-left-radius: 5px;
+
+      box-shadow:
+        0 5px 20px rgba(30, 28, 55, 0.045);
+    }
+
+    /* =====================================
+       FIXED INPUT AREA
+    ====================================== */
+
+    .controls-wrapper {
+      position: fixed;
+
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      z-index: 100;
+
+      padding: 18px 20px 20px;
+
+      background:
+        linear-gradient(
+          to top,
+          rgba(245, 247, 251, 1) 65%,
+          rgba(245, 247, 251, 0)
+        );
     }
 
     .controls {
-      padding: 18px;
-      border-top: 1px solid #e5e7eb;
-      background: white;
+      width: min(850px, 100%);
+      margin: auto;
+
+      padding: 12px;
+
+      background:
+        rgba(255, 255, 255, 0.94);
+
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+
+      border: 1px solid #dedfeb;
+
+      border-radius: 20px;
+
+      box-shadow:
+        0 15px 45px rgba(30, 27, 65, 0.13);
     }
+
+    /* =====================================
+       INPUT
+    ====================================== */
 
     .input-row {
       display: flex;
-      gap: 10px;
+      align-items: center;
+
+      gap: 9px;
     }
 
-    textarea {
+    #messageInput {
       flex: 1;
-      resize: none;
-      min-height: 52px;
-      max-height: 140px;
-      padding: 14px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      font: inherit;
+      min-width: 0;
+
+      height: 48px;
+
+      padding: 0 16px;
+
+      border: 1px solid transparent;
+      border-radius: 14px;
+
       outline: none;
+
+      background: #f5f6fa;
+
+      color: var(--text);
+
+      font-size: 14px;
+
+      transition:
+        border-color 0.2s,
+        background 0.2s,
+        box-shadow 0.2s;
     }
 
-    textarea:focus {
-      border-color: #2563eb;
+    #messageInput::placeholder {
+      color: #9699a8;
     }
 
-    button {
-      border: none;
-      border-radius: 10px;
-      padding: 0 20px;
-      font-weight: bold;
-      cursor: pointer;
+    #messageInput:focus {
+      background: #ffffff;
+
+      border-color: #cfc9ff;
+
+      box-shadow:
+        0 0 0 4px rgba(109, 93, 252, 0.08);
     }
+
+    /* =====================================
+       SEND BUTTON
+    ====================================== */
 
     #sendButton {
-      background: #2563eb;
+      width: 48px;
+      height: 48px;
+
+      flex-shrink: 0;
+
+      border: none;
+      border-radius: 14px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7464ff,
+          #594ae9
+        );
+
       color: white;
+
+      cursor: pointer;
+
+      font-size: 18px;
+      font-weight: 700;
+
+      box-shadow:
+        0 7px 18px rgba(91, 76, 233, 0.25);
+
+      transition:
+        transform 0.18s,
+        box-shadow 0.18s,
+        opacity 0.18s;
+    }
+
+    #sendButton:hover:not(:disabled) {
+      transform: translateY(-1px);
+
+      box-shadow:
+        0 10px 24px rgba(91, 76, 233, 0.32);
+    }
+
+    #sendButton:active:not(:disabled) {
+      transform: translateY(1px);
     }
 
     #sendButton:disabled {
-      background: #9ca3af;
+      opacity: 0.55;
       cursor: not-allowed;
     }
 
+    /* =====================================
+       BOTTOM CONTROLS
+    ====================================== */
+
+    .bottom-row {
+      display: flex;
+
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 8px 4px 1px;
+    }
+
+    #status {
+      color: #888b9b;
+
+      font-size: 11px;
+    }
+
     #clearButton {
-      margin-top: 10px;
-      padding: 10px 14px;
-      background: #e5e7eb;
-      color: #374151;
+      padding: 4px 7px;
+
+      border: none;
+      background: transparent;
+
+      color: #858899;
+
+      font-size: 11px;
+
+      cursor: pointer;
+
+      border-radius: 7px;
+
+      transition:
+        background 0.15s,
+        color 0.15s;
     }
 
-    .status {
-      margin-top: 10px;
-      font-size: 13px;
-      color: #6b7280;
+    #clearButton:hover {
+      color: #5144c1;
+      background: #f0eeff;
     }
 
-    @media (max-width: 600px) {
-      .app {
-        width: 100%;
-        margin: 0;
-        border-radius: 0;
+    /* =====================================
+       MOBILE
+    ====================================== */
+
+    @media (max-width: 650px) {
+
+      .header {
+        height: 82px;
+      }
+
+      .header-inner {
+        width: 92%;
+      }
+
+      .logo {
+        width: 39px;
+        height: 39px;
+
+        border-radius: 12px;
+
+        font-size: 18px;
+      }
+
+      .brand-text h1 {
+        font-size: 16px;
+      }
+
+      .brand-text p {
+        font-size: 10px;
+      }
+
+      .qvac-status {
+        padding: 7px 9px;
+        font-size: 10px;
       }
 
       .chat {
-        height: calc(100vh - 250px);
+        padding: 25px 14px 170px;
       }
 
-      .message {
-        max-width: 90%;
+      .welcome {
+        min-height: 55vh;
+      }
+
+      .welcome-icon {
+        width: 60px;
+        height: 60px;
+
+        border-radius: 19px;
+
+        font-size: 26px;
+      }
+
+      .welcome h2 {
+        font-size: 23px;
+      }
+
+      .welcome p {
+        font-size: 13px;
+      }
+
+      .message-content {
+        max-width: 88%;
+      }
+
+      .bubble {
+        padding: 12px 14px;
+        font-size: 13px;
+      }
+
+      .controls-wrapper {
+        padding: 10px 10px 12px;
+      }
+
+      .controls {
+        padding: 9px;
+
+        border-radius: 17px;
+      }
+
+      #messageInput {
+        height: 45px;
+        font-size: 13px;
+      }
+
+      #sendButton {
+        width: 45px;
+        height: 45px;
       }
     }
   </style>
 </head>
 
 <body>
+
   <div class="app">
-    <header>
-      <h1>LocalAI Chat</h1>
-      <p>Private AI running directly on your device</p>
-      <div class="badge">● QVAC Local Inference</div>
+
+    <!-- =================================
+         HEADER
+    ================================== -->
+
+    <header class="header">
+
+      <div class="header-inner">
+
+        <div class="brand">
+
+          <div class="logo">
+            AI
+          </div>
+
+          <div class="brand-text">
+
+            <h1>
+              LocalAI Chat
+            </h1>
+
+            <p>
+              Private AI running directly on your device
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="qvac-status">
+
+          <span class="status-dot"></span>
+
+          <span>
+            QVAC Local
+          </span>
+
+        </div>
+
+      </div>
+
     </header>
 
-    <main id="chat" class="chat">
-      <div class="system">
-        Your conversation is processed locally using QVAC.
+
+    <!-- =================================
+         CHAT AREA
+    ================================== -->
+
+    <main class="chat" id="chat">
+
+      <div class="chat-inner" id="chatInner">
+
+        <div class="welcome" id="welcome">
+
+          <div class="welcome-icon">
+            AI
+          </div>
+
+          <h2>
+            How can I help you?
+          </h2>
+
+          <p>
+            Ask a question and get an AI response generated
+            directly on your device using QVAC.
+          </p>
+
+          <div class="privacy-note">
+            🔒 Your conversation stays local
+          </div>
+
+        </div>
+
       </div>
+
     </main>
 
-    <section class="controls">
-      <div class="input-row">
-        <textarea
-          id="messageInput"
-          placeholder="Ask your local AI something..."
-        ></textarea>
 
-        <button id="sendButton">Send</button>
+    <!-- =================================
+         FIXED INPUT
+    ================================== -->
+
+    <div class="controls-wrapper">
+
+      <div class="controls">
+
+        <div class="input-row">
+
+          <input
+            type="text"
+            id="messageInput"
+            placeholder="Message LocalAI..."
+            autocomplete="off"
+          />
+
+          <button
+            id="sendButton"
+            title="Send message"
+            aria-label="Send message"
+          >
+            ➤
+          </button>
+
+        </div>
+
+
+        <div class="bottom-row">
+
+          <span id="status">
+            Ready • Local inference
+          </span>
+
+          <button id="clearButton">
+            Clear conversation
+          </button>
+
+        </div>
+
       </div>
 
-      <button id="clearButton">Clear Conversation</button>
+    </div>
 
-      <div id="status" class="status">
-        Ready — QVAC local model is loaded.
-      </div>
-    </section>
   </div>
 
+
+  <!-- =================================
+       JAVASCRIPT
+  ================================== -->
+
   <script>
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("messageInput");
-    const sendButton = document.getElementById("sendButton");
-    const clearButton = document.getElementById("clearButton");
-    const status = document.getElementById("status");
+
+    const chat =
+      document.getElementById("chat");
+
+    const chatInner =
+      document.getElementById("chatInner");
+
+    const messageInput =
+      document.getElementById("messageInput");
+
+    const sendButton =
+      document.getElementById("sendButton");
+
+    const clearButton =
+      document.getElementById("clearButton");
+
+    const status =
+      document.getElementById("status");
+
+    const welcome =
+      document.getElementById("welcome");
+
 
     let chatHistory = [];
 
+
+    /* =================================
+       ADD MESSAGE
+    ================================== */
+
     function addMessage(role, content) {
-      const message = document.createElement("div");
-      message.className = `message ${role}`;
-      message.textContent = content;
 
-      chat.appendChild(message);
-      chat.scrollTop = chat.scrollHeight;
+      if (welcome) {
+        welcome.style.display = "none";
+      }
 
-      return message;
+
+      const message =
+        document.createElement("div");
+
+      message.className =
+        `message ${role}`;
+
+
+      const contentWrapper =
+        document.createElement("div");
+
+      contentWrapper.className =
+        "message-content";
+
+
+      const label =
+        document.createElement("div");
+
+      label.className =
+        "message-label";
+
+      label.textContent =
+        role === "user"
+          ? "You"
+          : "LocalAI";
+
+
+      const bubble =
+        document.createElement("div");
+
+      bubble.className =
+        "bubble";
+
+      bubble.textContent =
+        content;
+
+
+      contentWrapper.appendChild(label);
+
+      contentWrapper.appendChild(bubble);
+
+      message.appendChild(contentWrapper);
+
+      chatInner.appendChild(message);
+
+
+      chat.scrollTop =
+        chat.scrollHeight;
+
     }
 
-    async function sendMessage() {
-      const message = input.value.trim();
 
-      if (!message || sendButton.disabled) {
+    /* =================================
+       SEND MESSAGE
+    ================================== */
+
+    async function sendMessage() {
+
+      const message =
+        messageInput.value.trim();
+
+
+      if (!message) {
         return;
       }
 
-      input.value = "";
 
-      addMessage("user", message);
+      messageInput.value = "";
+
+
+      addMessage(
+        "user",
+        message
+      );
+
+
       chatHistory.push({
         role: "user",
         content: message
       });
 
-      sendButton.disabled = true;
-      input.disabled = true;
-      status.textContent = "AI is thinking locally...";
 
-      const typingMessage = addMessage(
-        "assistant",
-        "Generating response..."
-      );
-      typingMessage.classList.add("typing");
+      sendButton.disabled = true;
+
+      messageInput.disabled = true;
+
+
+      status.textContent =
+        "QVAC is thinking locally...";
+
 
       try {
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            history: chatHistory
-          })
-        });
 
-        const data = await response.json();
+        const response =
+          await fetch(
+            "/api/chat",
+            {
+              method: "POST",
 
-        typingMessage.remove();
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+                history: chatHistory
+              })
+            }
+          );
+
+
+        const data =
+          await response.json();
+
 
         if (!response.ok) {
-          throw new Error(data.error || "Request failed.");
+
+          throw new Error(
+            data.error ||
+            "Local AI inference failed."
+          );
+
         }
 
-        addMessage("assistant", data.response);
 
-        chatHistory.push({
-          role: "assistant",
-          content: data.response
-        });
+        const aiResponse =
+          data.response;
 
-        status.textContent = "Ready — response generated locally.";
-      } catch (error) {
-        typingMessage.remove();
 
         addMessage(
           "assistant",
-          `Error: ${error.message}`
+          aiResponse
         );
 
-        status.textContent = "Error during local inference.";
+
+        chatHistory.push({
+          role: "assistant",
+          content: aiResponse
+        });
+
+
+        status.textContent =
+          "Ready • Local inference";
+
+
+      } catch (error) {
+
+        console.error(
+          "Chat error:",
+          error
+        );
+
+
+        addMessage(
+          "assistant",
+          "Error: " +
+          error.message
+        );
+
+
+        status.textContent =
+          "Local inference error";
+
       } finally {
+
         sendButton.disabled = false;
-        input.disabled = false;
-        input.focus();
+
+        messageInput.disabled = false;
+
+        messageInput.focus();
+
       }
+
     }
 
-    sendButton.addEventListener("click", sendMessage);
 
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        sendMessage();
+    /* =================================
+       SEND BUTTON
+    ================================== */
+
+    sendButton.addEventListener(
+      "click",
+      sendMessage
+    );
+
+
+    /* =================================
+       ENTER KEY
+    ================================== */
+
+    messageInput.addEventListener(
+      "keydown",
+      (event) => {
+
+        if (
+          event.key === "Enter" &&
+          !event.shiftKey
+        ) {
+
+          event.preventDefault();
+
+          sendMessage();
+
+        }
+
       }
-    });
+    );
 
-    clearButton.addEventListener("click", () => {
-      chatHistory = [];
 
-      chat.innerHTML = `
-        <div class="system">
-          New conversation started. Your messages stay on this device.
-        </div>
-      `;
+    /* =================================
+       CLEAR CONVERSATION
+    ================================== */
 
-      status.textContent = "Ready — conversation cleared.";
-      input.focus();
-    });
+    clearButton.addEventListener(
+      "click",
+      () => {
+
+        chatHistory = [];
+
+
+        chatInner.innerHTML = `
+
+          <div
+            class="welcome"
+            id="welcome"
+          >
+
+            <div class="welcome-icon">
+              AI
+            </div>
+
+            <h2>
+              How can I help you?
+            </h2>
+
+            <p>
+              Ask a question and get an AI response
+              generated directly on your device using QVAC.
+            </p>
+
+            <div class="privacy-note">
+              🔒 Your conversation stays local
+            </div>
+
+          </div>
+
+        `;
+
+
+        status.textContent =
+          "Ready • Local inference";
+
+
+        messageInput.focus();
+
+      }
+    );
+
+
+    /* =================================
+       INITIAL FOCUS
+    ================================== */
+
+    messageInput.focus();
+
   </script>
+
 </body>
 </html>
