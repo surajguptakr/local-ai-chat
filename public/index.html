@@ -1,141 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LocalAI Chat</title>
 
   <style>
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      background: #f4f7fb;
+      background: #f4f6f8;
       color: #1f2937;
-      min-height: 100vh;
     }
 
-    .container {
-      max-width: 850px;
-      margin: auto;
-      padding: 30px 20px;
+    .app {
+      width: min(900px, 95%);
+      margin: 30px auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
     }
 
     header {
-      text-align: center;
-      margin-bottom: 25px;
+      padding: 24px;
+      background: #111827;
+      color: white;
     }
 
     header h1 {
-      font-size: 32px;
-      margin-bottom: 8px;
+      margin: 0 0 6px;
+      font-size: 26px;
     }
 
     header p {
-      color: #6b7280;
+      margin: 0;
+      color: #d1d5db;
     }
 
     .badge {
       display: inline-block;
-      margin-top: 12px;
-      padding: 7px 14px;
+      margin-top: 14px;
+      padding: 7px 12px;
       border-radius: 20px;
-      background: #dcfce7;
-      color: #166534;
+      background: #166534;
       font-size: 13px;
-      font-weight: bold;
     }
 
-    .chat-box {
-      background: white;
-      border-radius: 16px;
-      min-height: 520px;
-      padding: 20px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-
-      display: flex;
-      flex-direction: column;
-    }
-
-    #messages {
-      flex: 1;
+    .chat {
+      height: 500px;
       overflow-y: auto;
-      margin-bottom: 20px;
+      padding: 22px;
+      background: #f9fafb;
     }
 
     .message {
-      margin-bottom: 18px;
-      display: flex;
-    }
-
-    .message.user {
-      justify-content: flex-end;
-    }
-
-    .bubble {
-      max-width: 75%;
-      padding: 12px 16px;
+      max-width: 78%;
+      margin-bottom: 16px;
+      padding: 12px 15px;
       border-radius: 14px;
       line-height: 1.5;
       white-space: pre-wrap;
     }
 
-    .user .bubble {
+    .user {
+      margin-left: auto;
       background: #2563eb;
       color: white;
       border-bottom-right-radius: 4px;
     }
 
-    .assistant .bubble {
-      background: #f1f5f9;
-      color: #1f2937;
+    .assistant {
+      margin-right: auto;
+      background: #e5e7eb;
+      color: #111827;
       border-bottom-left-radius: 4px;
     }
 
-    .label {
-      font-size: 11px;
-      font-weight: bold;
-      margin-bottom: 5px;
-      opacity: 0.7;
+    .system {
+      max-width: 100%;
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+      margin: 10px 0 18px;
     }
 
-    .input-area {
+    .typing {
+      font-style: italic;
+      color: #6b7280;
+    }
+
+    .controls {
+      padding: 18px;
+      border-top: 1px solid #e5e7eb;
+      background: white;
+    }
+
+    .input-row {
       display: flex;
       gap: 10px;
-      border-top: 1px solid #e5e7eb;
-      padding-top: 15px;
     }
 
-    #messageInput {
+    textarea {
       flex: 1;
-      padding: 13px 15px;
+      resize: none;
+      min-height: 52px;
+      max-height: 140px;
+      padding: 14px;
       border: 1px solid #d1d5db;
       border-radius: 10px;
-      font-size: 15px;
+      font: inherit;
       outline: none;
     }
 
-    #messageInput:focus {
+    textarea:focus {
       border-color: #2563eb;
     }
 
-    #sendButton {
-      padding: 13px 22px;
+    button {
       border: none;
       border-radius: 10px;
-      background: #2563eb;
-      color: white;
+      padding: 0 20px;
       font-weight: bold;
       cursor: pointer;
     }
 
-    #sendButton:hover {
-      background: #1d4ed8;
+    #sendButton {
+      background: #2563eb;
+      color: white;
     }
 
     #sendButton:disabled {
@@ -143,310 +139,178 @@
       cursor: not-allowed;
     }
 
-    .clear-button {
-      margin-top: 12px;
-      padding: 9px;
-      border: 1px solid #d1d5db;
-      background: white;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .clear-button:hover {
-      background: #f3f4f6;
+    #clearButton {
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: #e5e7eb;
+      color: #374151;
     }
 
     .status {
-      text-align: center;
-      margin-top: 15px;
+      margin-top: 10px;
       font-size: 13px;
       color: #6b7280;
+    }
+
+    @media (max-width: 600px) {
+      .app {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+      }
+
+      .chat {
+        height: calc(100vh - 250px);
+      }
+
+      .message {
+        max-width: 90%;
+      }
     }
   </style>
 </head>
 
 <body>
+  <div class="app">
+    <header>
+      <h1>LocalAI Chat</h1>
+      <p>Private AI running directly on your device</p>
+      <div class="badge">● QVAC Local Inference</div>
+    </header>
 
-<div class="container">
+    <main id="chat" class="chat">
+      <div class="system">
+        Your conversation is processed locally using QVAC.
+      </div>
+    </main>
 
-  <header>
-    <h1>LocalAI Chat</h1>
+    <section class="controls">
+      <div class="input-row">
+        <textarea
+          id="messageInput"
+          placeholder="Ask your local AI something..."
+        ></textarea>
 
-    <p>
-      Private AI running directly on your device
-    </p>
-
-    <span class="badge">
-      ● QVAC Local Inference
-    </span>
-  </header>
-
-  <div class="chat-box">
-
-    <div id="messages">
-
-      <div class="message assistant">
-        <div class="bubble">
-
-          <div class="label">
-            LOCAL AI
-          </div>
-
-          Hello! I'm running locally through QVAC.
-          Ask me anything.
-
-        </div>
+        <button id="sendButton">Send</button>
       </div>
 
-    </div>
+      <button id="clearButton">Clear Conversation</button>
 
-    <div class="input-area">
-
-      <input
-        id="messageInput"
-        type="text"
-        placeholder="Ask something..."
-        autocomplete="off"
-      >
-
-      <button id="sendButton">
-        Send
-      </button>
-
-    </div>
-
-    <button
-      class="clear-button"
-      id="clearButton"
-    >
-      Clear Conversation
-    </button>
-
+      <div id="status" class="status">
+        Ready — QVAC local model is loaded.
+      </div>
+    </section>
   </div>
 
-  <div
-    class="status"
-    id="status"
-  >
-    AI model loaded locally
-  </div>
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+    const clearButton = document.getElementById("clearButton");
+    const status = document.getElementById("status");
 
-</div>
+    let chatHistory = [];
 
-<script>
+    function addMessage(role, content) {
+      const message = document.createElement("div");
+      message.className = `message ${role}`;
+      message.textContent = content;
 
-  const input =
-    document.getElementById("messageInput");
+      chat.appendChild(message);
+      chat.scrollTop = chat.scrollHeight;
 
-  const button =
-    document.getElementById("sendButton");
-
-  const clearButton =
-    document.getElementById("clearButton");
-
-  const messages =
-    document.getElementById("messages");
-
-  const status =
-    document.getElementById("status");
-
-
-  let chatHistory = [];
-
-
-  function addMessage(text, type) {
-
-    const message =
-      document.createElement("div");
-
-    message.className =
-      `message ${type}`;
-
-
-    const bubble =
-      document.createElement("div");
-
-    bubble.className =
-      "bubble";
-
-
-    const label =
-      document.createElement("div");
-
-    label.className =
-      "label";
-
-    label.textContent =
-      type === "user"
-        ? "YOU"
-        : "LOCAL AI";
-
-
-    const content =
-      document.createElement("div");
-
-    content.textContent =
-      text;
-
-
-    bubble.appendChild(label);
-
-    bubble.appendChild(content);
-
-    message.appendChild(bubble);
-
-    messages.appendChild(message);
-
-
-    messages.scrollTop =
-      messages.scrollHeight;
-  }
-
-
-  async function sendMessage() {
-
-    const message =
-      input.value.trim();
-
-
-    if (!message) {
-      return;
+      return message;
     }
 
+    async function sendMessage() {
+      const message = input.value.trim();
 
-    addMessage(
-      message,
-      "user"
-    );
-
-
-    chatHistory.push({
-      role: "user",
-      content: message
-    });
-
-
-    input.value = "";
-
-    button.disabled = true;
-
-    input.disabled = true;
-
-    status.textContent =
-      "Local AI is thinking...";
-
-
-    try {
-
-      const response =
-        await fetch(
-          "/api/chat",
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
-
-            body: JSON.stringify({
-              history: chatHistory
-            })
-          }
-        );
-
-
-      const data =
-        await response.json();
-
-
-      if (!response.ok) {
-        throw new Error(
-          data.error ||
-          "Request failed."
-        );
+      if (!message || sendButton.disabled) {
+        return;
       }
 
+      input.value = "";
 
-      addMessage(
-        data.response,
-        "assistant"
-      );
-
-
+      addMessage("user", message);
       chatHistory.push({
-        role: "assistant",
-        content: data.response
+        role: "user",
+        content: message
       });
 
+      sendButton.disabled = true;
+      input.disabled = true;
+      status.textContent = "AI is thinking locally...";
 
-      status.textContent =
-        "Response generated locally with QVAC";
-
-
-    } catch (error) {
-
-      addMessage(
-        `Error: ${error.message}`,
-        "assistant"
+      const typingMessage = addMessage(
+        "assistant",
+        "Generating response..."
       );
+      typingMessage.classList.add("typing");
 
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            history: chatHistory
+          })
+        });
 
-      status.textContent =
-        "Something went wrong";
+        const data = await response.json();
 
-    } finally {
+        typingMessage.remove();
 
-      button.disabled =
-        false;
+        if (!response.ok) {
+          throw new Error(data.error || "Request failed.");
+        }
 
-      input.disabled =
-        false;
+        addMessage("assistant", data.response);
 
-      input.focus();
+        chatHistory.push({
+          role: "assistant",
+          content: data.response
+        });
+
+        status.textContent = "Ready — response generated locally.";
+      } catch (error) {
+        typingMessage.remove();
+
+        addMessage(
+          "assistant",
+          `Error: ${error.message}`
+        );
+
+        status.textContent = "Error during local inference.";
+      } finally {
+        sendButton.disabled = false;
+        input.disabled = false;
+        input.focus();
+      }
     }
-  }
 
+    sendButton.addEventListener("click", sendMessage);
 
-  button.addEventListener(
-    "click",
-    sendMessage
-  );
-
-
-  input.addEventListener(
-    "keydown",
-    (event) => {
-
-      if (event.key === "Enter") {
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
         sendMessage();
       }
+    });
 
-    }
-  );
-
-
-  clearButton.addEventListener(
-    "click",
-    () => {
-
+    clearButton.addEventListener("click", () => {
       chatHistory = [];
 
-      messages.innerHTML = "";
+      chat.innerHTML = `
+        <div class="system">
+          New conversation started. Your messages stay on this device.
+        </div>
+      `;
 
-      addMessage(
-        "Conversation cleared. I'm ready for a new local AI conversation.",
-        "assistant"
-      );
-
-      status.textContent =
-        "New local conversation started";
-
+      status.textContent = "Ready — conversation cleared.";
       input.focus();
-    }
-  );
-
-</script>
-
+    });
+  </script>
 </body>
 </html>
