@@ -1,54 +1,72 @@
-import {
+﻿import {
   loadModel,
   LLAMA_3_2_1B_INST_Q4_0,
   completion,
   unloadModel
 } from "@qvac/sdk";
 
-async function main() {
+async function runLocalDemo() {
+  let localModelId = null;
+
   console.log("=================================");
-  console.log("      LocalAI Chat - QVAC Test");
+  console.log("        LocalAI Chat Demo");
   console.log("=================================\n");
 
-  console.log("Loading QVAC model...");
-  console.log("The model may need to download the first time.\n");
+  try {
+    console.log("Starting local QVAC model...\n");
 
-  const modelId = await loadModel({
-    modelSrc: LLAMA_3_2_1B_INST_Q4_0,
-    onProgress: (p) => {
-      console.log(
-        `Downloading: ${p.percentage.toFixed(0)}%`
-      );
-    }
-  });
+    localModelId = await loadModel({
+      modelSrc: LLAMA_3_2_1B_INST_Q4_0,
+      onProgress: ({ percentage }) => {
+        console.log(`Model preparation: ${percentage.toFixed(0)}%`);
+      }
+    });
 
-  console.log("\nModel loaded successfully!");
-  console.log("Running local AI inference...\n");
-
-  const result = completion({
-    modelId,
-    history: [
+    const conversation = [
       {
         role: "user",
-        content: "Explain artificial intelligence in one simple sentence."
+        content:
+          "Give me three practical examples of how on-device AI can protect user privacy."
       }
-    ],
-    stream: true
-  });
+    ];
 
-  for await (const token of result.tokenStream) {
-    process.stdout.write(token);
+    console.log("\nQVAC model is ready.");
+    console.log("Generating response locally:\n");
+
+    const generation = completion({
+      modelId: localModelId,
+      history: conversation,
+      stream: true
+    });
+
+    let completeAnswer = "";
+
+    for await (const piece of generation.tokenStream) {
+      completeAnswer += piece;
+      process.stdout.write(piece);
+    }
+
+    console.log("\n\n---------------------------------");
+    console.log("Local inference completed.");
+    console.log(`Response length: ${completeAnswer.length} characters`);
+    console.log("---------------------------------");
+
+  } catch (error) {
+    console.error("\nLocalAI demo failed:");
+    console.error(error);
+    process.exitCode = 1;
+  } finally {
+    if (localModelId) {
+      console.log("\nReleasing local QVAC model...");
+
+      try {
+        await unloadModel({ modelId: localModelId });
+        console.log("QVAC model released successfully.");
+      } catch (cleanupError) {
+        console.error("Model cleanup failed:", cleanupError);
+      }
+    }
   }
-
-  console.log("\n\nAI response completed.");
-
-  await unloadModel({ modelId });
-
-  console.log("QVAC model unloaded.");
 }
 
-main().catch((error) => {
-  console.error("\nQVAC Error:");
-  console.error(error);
-  process.exit(1);
-});
+runLocalDemo();
